@@ -44,11 +44,36 @@ LOGLINE="`date` - `hostname -s` - `whoami`"
 # Configuration checks
 # ------------------------------------------------------------------------
 
+#
+# Log directory and file permission checks
+#
+
 # Verify that the log directory exists
 if [ ! -d "${LOGDIR}" ]; then
     echo "${PROGNAME}: log directory '${LOGDIR}' does not exist" >&2
     exit 2
 fi
+
+# Verify that the current user has +w on the log directory
+if [ ! -w "${LOGDIR}" ]; then
+    echo -n "${PROGNAME}: " >&2
+    echo "user `whoami` cannot write to log directory '${LOGDIR}'" 2>&1
+    exit 2
+fi
+
+# Verify that the current user has +w on the log file
+if [ -e "${LOGFILE}" ]; then
+    if [ ! -w "${LOGFILE}" ]; then
+        echo -n "${PROGNAME}: " >&2
+        echo "user `whoami` cannot write to the log file '${LOGFILE}'" 2>&1
+        exit 2
+    fi
+fi
+
+
+#
+# Editor selection
+#
 
 # Check the editor requested by the program name
 case "$PROGNAME" in
@@ -116,6 +141,7 @@ function edit()
 
     # Create the lock file
     echo "${LOGLINE}" >> "${LOCKFILE}"
+    chmod ug+rw "${LOCKFILE}"
 
     # Edit the file
     case "$EDITOR" in
@@ -130,8 +156,9 @@ function edit()
             ;;
     esac
 
-    # Remove the lock file
+    # Remove the lock file, and reset the permissions on the log file
     rm -f "${LOCKFILE}"
+    chmod ug+rw "${LOGFILE}"
 }
 
 #
