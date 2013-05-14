@@ -1,0 +1,221 @@
+#!/bin/bash
+
+#
+# salog/vilog/emacslog - system administration logfile editor and viewer
+# 
+# This is a recreation of the vilog system administration logfile editor and
+# viewer with support for additional editors.
+# 
+# This version features:
+#
+#  - Simple log file locking and editing
+# 
+#  - Proposed support for a variety of editors using the program name (e.g.,
+#  vilog, emacslog, etc.). To add support for an editor, add commands to open
+#  and append to the logfile in the edit() function.
+#
+
+# ------------------------------------------------------------------------
+# Configuration
+# ------------------------------------------------------------------------
+
+PROGNAME="`basename $0`"
+LOGDIR="/var/log/salog"
+
+
+
+# ------------------------------------------------------------------------
+# Globals
+# ------------------------------------------------------------------------
+
+
+# File prefix: salog_system_year_month
+FILEPREFIX="salog_`hostname -s`_`date +'%Y_%m'`"
+LOGFILE="${LOGDIR}/${FILEPREFIX}.txt"
+LOCKFILE="${LOGDIR}/${FILEPREFIX}.lock"
+
+# Log entry string for inclusion in the log file
+#LOGLINE="`date +'%a %Y-%m-%d %Z'` - `hostname` - `whoami`"
+LOGLINE="`date` - `hostname -s` - `whoami`"
+
+
+
+# ------------------------------------------------------------------------
+# Configuration checks
+# ------------------------------------------------------------------------
+
+# Verify that the log directory exists
+if [ ! -d "${LOGDIR}" ]; then
+    echo "${PROGNAME}: log directory '${LOGDIR}' does not exist" >&2
+    exit 2
+fi
+
+# Check the editor requested by the program name
+case "$PROGNAME" in
+    vilog )
+        EDITOR=vim
+        ;;
+    emacslog )
+        EDITOR=emacs
+        ;;
+    * )
+        # Examine VISUAL for the editor of choice
+        case "$VISUAL" in
+            vim | emacs )
+                EDITOR=$VISUAL
+                ;;
+            * )
+                echo "${PROGNAME}: invocation $PROGNAME is not supported, using vim" >&2
+                EDITOR=vim
+                ;;
+        esac
+        ;;
+esac
+
+# Make sure that the editor is actually present
+if [ ! -e `which $EDITOR` ]; then
+    echo "${PROGNAME}: editor `$EDITOR` not found" >&2
+    exit 2
+fi
+
+
+
+# ------------------------------------------------------------------------
+# Action subroutines
+# ------------------------------------------------------------------------
+
+function usage()
+{
+    # Display the usage
+    echo "Usage: ${PROGNAME} [-e [-f]] [-h]"
+    echo "View or edit the system administration log file"
+    echo "    -e  Edit the current month's log file"
+    echo "    -f  Force editing the current log file, overriding lock"
+    echo "    -h  Display this help message"
+}
+
+function edit()
+{
+    # Check for the lock file
+    if [ -e "${LOCKFILE}" ]; then
+        
+        # Print the contents of the lock file
+        echo "${PROGNAME}: file is locked:" >&2
+        echo -n "   " >&2
+        cat "${LOCKFILE}" >&2
+
+        # Abort editing, or clear log file if --force specified
+        if [ -z "${FORCE}" ]; then
+            echo "Use '${PROGNAME} -f' to force editing" >&2
+            exit 3
+        fi
+        echo "Press Enter to continue editing file, or Ctrl-C to abort" >&2
+        read
+        rm -f "${LOCKFILE}"
+    fi
+
+    # Create the lock file
+    echo "${LOGLINE}" >> "${LOCKFILE}"
+
+    # Edit the file
+    case "$EDITOR" in
+        vim )
+            # +    Move to end of file
+            # -c   Issue ex command:
+            #      "r! echo .." run command and insert text into buffer
+            $EDITOR + -c "r! echo -e '\n${LOGLINE}\n'" ${LOGFILE} -c "start"
+            ;;
+        emacs )
+            echo "TODO - not implemented" >&2
+            ;;
+    esac
+
+    # Remove the lock file
+    rm -f "${LOCKFILE}"
+}
+
+#
+# View the existing logfile in read-only mode
+#
+function view()
+{
+    # If the file does not exist, display an error message
+    if [ ! -e "${LOGFILE}" ]; then
+        echo "${PROGNAME}: log file ${LOGFILE} does not exist" >> /dev/stderr
+        exit 2
+    fi
+
+    # Open the log file in read-only mode
+    case "$EDITOR" in
+        vim )
+            # -R    readonly
+            # +     position on the last line of the file
+            $EDITOR -R ${LOGFILE} +
+            ;;
+        emacs )
+            echo "TODO - not implemented" >&2
+            ;;
+    esac
+}
+
+
+
+# ------------------------------------------------------------------------
+# Option Processing
+# ------------------------------------------------------------------------
+
+# The default action is to view the current log file
+action="view"
+
+# Read the command-line arguments
+while :
+do
+    case "$1" in
+        -h  | --help )
+            action="usage"
+            ;;
+
+        -e | --edit )
+            action="edit"
+            ;;
+
+        -f | --force )
+            FORCE=1
+            ;;
+
+        -* ) # Unknown option
+            echo "unknown option '$1' ignored"
+            ;;
+
+        * ) # End of options
+            break
+            ;;
+    esac
+    shift
+done
+
+# Select the appropriate action
+case "$action" in 
+    usage ) 
+        usage
+        exit 0
+        ;;
+    edit )
+        edit
+        exit 0
+        ;;
+    view )
+        if [ ! -z "${FORCE}" ]; then
+            echo "$PROGNAME: option --force not available for --view" >&2
+            usage
+            exit 2
+        fi
+        view
+        exit 0
+        ;;
+    * )
+        usage
+        exit 2
+        ;;
+esac
+
