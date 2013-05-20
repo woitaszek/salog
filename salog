@@ -90,7 +90,8 @@ case "$PROGNAME" in
                 EDITOR=$VISUAL
                 ;;
             * )
-                echo "${PROGNAME}: invocation $PROGNAME is not supported, using vim" >&2
+                echo -n "${PROGNAME}: " >&2
+                echo "invocation $PROGNAME is not supported, using vim" >&2
                 EDITOR=vim
                 ;;
         esac
@@ -146,10 +147,8 @@ function edit()
     # Edit the file
     case "$EDITOR" in
         vim )
-            # +    Move to end of file
-            # -c   Issue ex command:
-            #      "r! echo .." run command and insert text into buffer
-            $EDITOR + -c "r! echo -e '\n${LOGLINE}\n'" ${LOGFILE} -c "start"
+            $EDITOR + -c "normal A${LOGLINE}" ${LOGFILE} 
+
             ;;
         emacs )
             echo "TODO - not implemented" >&2
