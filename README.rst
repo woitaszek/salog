@@ -1,8 +1,8 @@
 
 .h1 salog - System administration logfile editor
 
-``salog`` is a tool for system administrators to record their activities on an
-administered system.  Every invocation of ``salog -e`` opens the sysadmin log
+``salog`` is a tool for system administrators to record their activities on a
+computer system.  Invocation using ``salog -e`` opens the sysadmin log
 and inserts a timestamped header line, ready for notes regarding activity on
 the system.  System administration log files are named based on the hostname
 and month, supporting storage on a network file system or aggregation on a
@@ -12,7 +12,7 @@ centralized host for the generation of environment-wide digests.
 exist on the Internet anymore. This rewrite as ``salog`` has a simpler
 command-line interface and also supports emacs. The editor of choice is
 selected via the command-line invocation (e.g, ``vilog`` or ``emacslog``), or,
-for ``salog``, by the ``$VISUAL`` environment variable. 
+when invoked using ``salog``, by the ``$VISUAL`` environment variable. 
 
 
 .h2 Usage
@@ -47,7 +47,7 @@ Options:
     $ sudo chmod g+ws /var/log/salog
 
 
-.h2 Other Tools
+.h2 Continuing Develpment and Other Tools
 
 Other tools under development include:
 
