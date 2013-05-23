@@ -1,7 +1,6 @@
-
 # salog - System administration log editor
 
-The system administrator log (**salog**) is a wrapper for vim and emacs that
+The system administrator log **(salog)** is a wrapper for vim and emacs that
 allows system administrators and operators to quickly and easily record and
 view administrative activities on a computer system.
 
@@ -30,10 +29,10 @@ By default, logfiles are stored on each system in ``/var/log/salog``.
 ### Examples
 
 * To add an entry to the system administration log:
- 
-       $ salog -e          # Uses $VISUAL if set to vim or emacs
-       $ vilog -e          # Always uses vim (if present)
-       $ emacslog -e       # Always uses emacs (if present)
+
+        $ salog -e          # Uses $VISUAL if set to vim or emacs
+        $ vilog -e          # Always uses vim (if present)
+        $ emacslog -e       # Always uses emacs (if present)
 
 * To view the current month's system administration log, simply run ``salog``,
 ``vilog``, or ``emacslog`` with no options.
@@ -43,17 +42,18 @@ By default, logfiles are stored on each system in ``/var/log/salog``.
 
 * The ``salog`` script may be installed in any directory accessible via
   the system's configured path. Use symlinks to enable vilog or emacslog:
+        
+        $ ln -s salog vilog
+        $ ln -s salog emacslog
 
-      $ ln -s salog vilog
-      $ ln -s salog emacslog
 
 * The centralized user directory should be created with group permissions
   that allow all members of the system administration team to create and
   edit files. For example:
-
-      $ sudo mkdir /var/log/salog
-      $ sudo chown root:admin /var/log/salog
-      $ sudo chmod g+ws /var/log/salog
+        
+        $ sudo mkdir /var/log/salog
+        $ sudo chown root:admin /var/log/salog
+        $ sudo chmod g+ws /var/log/salog
 
 
 ## History 
