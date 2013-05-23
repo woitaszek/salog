@@ -8,7 +8,8 @@ With **salog**, system administration log files are stored in a customizable
 directory. Log files are based on the hostname and month (e.g.,
 ``salog_$HOSTNAME_$YEAR_$MONTH.txt``), so that all of the files may stored on a
 centralized file system or consolidated in a centralized location and used to
-generate a daily digest.
+generate a daily digest. Log files are locked using a simple lock file scheme
+to prevent accidental simultaneous updates by multiple administrators.
 
 By default, logfiles are stored on each system in ``/var/log/salog``.
 
