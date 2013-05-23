@@ -147,11 +147,13 @@ function edit()
     # Edit the file
     case "$EDITOR" in
         vim )
-            $EDITOR + -c "normal A${LOGLINE}" ${LOGFILE} 
+            vim + -c "normal A${LOGLINE}" ${LOGFILE} 
 
             ;;
         emacs )
-            echo "TODO - not implemented" >&2
+            emacs ${LOGFILE} \
+                --eval '(goto-char (point-max))' \
+                --eval "(insert \"${LOGLINE}\")"
             ;;
     esac
 
@@ -176,10 +178,13 @@ function view()
         vim )
             # -R    readonly
             # +     position on the last line of the file
-            $EDITOR -R ${LOGFILE} +
+            vim -R ${LOGFILE} +
             ;;
         emacs )
-            echo "TODO - not implemented" >&2
+            # http://superuser.com/questions/204236/how-can-i-open-a-file-read-only-from-command-line-with-emacs-vi-vim
+            emacs ${LOGFILE} \
+                --eval '(goto-char (point-max))' \
+                --eval '(setq buffer-read-only t)'
             ;;
     esac
 }
