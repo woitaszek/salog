@@ -13,6 +13,7 @@ cd $GITSALOGDIR
 # Get all of the files from the hosts
 # TODO
 
+
 # Add all new files and changes into git
 git add --all
 
@@ -53,7 +54,7 @@ do
     # Strip double blank lines (cat -s), and strip the first line 
     # and last lines if they are blank.
 
-    git blame $f | grep -E "^000000" | cut -c 58- | \
+    git blame $f | grep -E "^000000" | cut -d\) -f2 | cut -c2- | \
         cat -s | sed '1{/^$/d;}' | sed '${/^$/d;}' >> $TEMPFILE
     echo >> $TEMPFILE
 done
@@ -65,7 +66,7 @@ echo >> $TEMPFILE
 # ----------------------------------------
 
 # TODO
-# cat $TEMPFILE | mailx ...
+# cat $TEMPFILE | mailx -s "salog report `date +\"%Y-%m-%d %H:%M:%S\"`"
 
 # ----------------------------------------
 # Commit the changes
